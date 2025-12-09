@@ -1,0 +1,257 @@
+# ===========================
+# Python
+# ===========================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.hypothesis/
+.pytest_cache/
+cover/
+
+# ===========================
+# Testing Outputs
+# ===========================
+# Screenshots from failed tests (ignore contents but keep folder structure)
+screenshots/*
+!screenshots/.gitkeep
+
+# Test reports (ignore contents but keep folder structure)
+reports/*
+!reports/.gitkeep
+
+# Generated test files (ignore contents but keep folder structure)
+test_files/*
+!test_files/.gitkeep
+
+# Test results
+.test_results/
+test-results/
+test_output/
+
+# ===========================
+# Selenium / WebDriver
+# ===========================
+# WebDriver manager cache
+.wdm/
+geckodriver.log
+chromedriver.log
+selenium-debug.log
+
+# Downloaded drivers
+drivers/
+*.exe
+
+# ===========================
+# Virtual Environments
+# ===========================
+# virtualenv
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# ===========================
+# IDEs & Editors
+# ===========================
+# VSCode
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+.idea_modules/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# ===========================
+# OS Files
+# ===========================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.nfs*
+
+# ===========================
+# Environment & Secrets
+# ===========================
+.env
+.env.local
+.env.*.local
+.env.test
+.env.production
+*.key
+*.pem
+credentials.json
+secrets.json
+
+# ===========================
+# Logs
+# ===========================
+*.log
+logs/
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ===========================
+# Database
+# ===========================
+*.db
+*.sqlite
+*.sqlite3
+
+# ===========================
+# Temporary Files
+# ===========================
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.~lock.*
+
+# ===========================
+# Archives
+# ===========================
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ===========================
+# Project Specific
+# ===========================
+# Ignore all backup files
+*.bak
+*.backup
+*_backup
+*_old
+
+# Ignore generated documentation
+docs/_build/
+
+# Ignore local configuration
+config.local.py
+local_settings.py
+
+# Ignore large data files
+*.csv
+*.xlsx
+*.xls
+!test_data.xlsx

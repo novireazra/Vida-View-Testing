@@ -14,14 +14,14 @@ class Config:
     PAGE_LOAD_TIMEOUT = 30
     
     # Test Data - Credentials
-    ADMIN_EMAIL = "admin@vidaview.com"
-    ADMIN_PASSWORD = "admin123"
+    ADMIN_EMAIL = "vidaview@admin.com"
+    ADMIN_PASSWORD = "reskares9"
     
-    OWNER_EMAIL = "owner@vidaview.com"
-    OWNER_PASSWORD = "owner123"
+    OWNER_EMAIL = "testing@pemilik.com"
+    OWNER_PASSWORD = "reskares9"
     
-    TENANT_EMAIL = "tenant@vidaview.com"
-    TENANT_PASSWORD = "tenant123"
+    TENANT_EMAIL = "testing@penyewa.com"
+    TENANT_PASSWORD = "reskares9"
     
     # New User Registration Data
     NEW_USER_PREFIX = "testuser"
