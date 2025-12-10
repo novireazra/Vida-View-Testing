@@ -26,7 +26,19 @@ def driver(request):
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
         
-        service = Service(ChromeDriverManager().install())
+        # Install chromedriver and ensure correct path
+        driver_path = ChromeDriverManager().install()
+        # Fix for webdriver_manager issue with Chrome for Testing
+        if os.path.isdir(driver_path):
+            driver_path = os.path.join(driver_path, "chromedriver")
+        elif not driver_path.endswith("chromedriver"):
+            # If path points to wrong file, find the actual chromedriver
+            driver_dir = os.path.dirname(driver_path)
+            chromedriver_path = os.path.join(driver_dir, "chromedriver")
+            if os.path.exists(chromedriver_path):
+                driver_path = chromedriver_path
+
+        service = Service(driver_path)
         driver = webdriver.Chrome(service=service, options=chrome_options)
     
     elif Config.BROWSER.lower() == "firefox":
