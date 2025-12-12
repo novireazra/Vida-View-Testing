@@ -14,6 +14,9 @@ class DocumentsPage(BasePage):
         from config.config import Config
         self.navigate_to(f"{Config.BASE_URL}/tenant/documents")
         self.wait_for_page_load()
+
+        print(f"[DEBUG] Setelah navigasi ke dokumen, URL saat ini: {self.driver.current_url}")
+        
         locator = self.locators.UPLOAD_BUTTON
         by = By.XPATH
 
@@ -21,9 +24,6 @@ class DocumentsPage(BasePage):
         # Gunakan find_element untuk menunggu visibilitas tombol Upload
             self.find_element(locator, by)
         except TimeoutException:
-            # Jika tombol tidak terlihat dalam 20 detik (misalnya karena loading spinner), 
-            # kita coba scroll, tapi ini sangat tidak mungkin jika 20 detik sudah habis.
-            # Jika Anda yakin halaman sudah benar-benar dimuat, raise error
             raise TimeoutException(f"Gagal memuat halaman dokumen. Tombol {locator} tidak ditemukan dalam {Config.EXPLICIT_WAIT} detik.")
 
     def click_upload_button(self):

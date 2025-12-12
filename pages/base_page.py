@@ -14,17 +14,16 @@ class BasePage:
         self.actions = ActionChains(driver)
     
     def find_element(self, locator, by=By.CSS_SELECTOR, timeout=None):
-        """Find element dengan wait sampai element terlihat (visibility_of_element_located)"""
-        try:
-            wait_time = timeout if timeout else Config.EXPLICIT_WAIT
-            wait = WebDriverWait(self.driver, wait_time)
-            # Mengubah dari presence_of_element_located ke visibility_of_element_located
-            return wait.until(EC.visibility_of_element_located((by, locator))) 
-        except TimeoutException:
-            # Tetap gunakan exception yang informatif
-            raise Exception(f"Element tidak ditemukan: {locator}")
-
-    
+            """Find element dengan wait sampai element terlihat (visibility_of_element_located)"""
+            try:
+                wait_time = timeout if timeout else Config.EXPLICIT_WAIT
+                wait = WebDriverWait(self.driver, wait_time)
+                # Menggunakan visibility_of_element_located
+                return wait.until(EC.visibility_of_element_located((by, locator))) 
+            except TimeoutException:
+                # Mengganti exception agar lebih jelas
+                raise Exception(f"Element tidak ditemukan (Timeout): {locator} menggunakan {by}")
+        
     def find_elements(self, locator, by=By.CSS_SELECTOR):
         """Find multiple elements"""
         return self.driver.find_elements(by, locator)
@@ -46,13 +45,18 @@ class BasePage:
         # Lakukan klik menggunakan JavaScript
         self.driver.execute_script("arguments[0].click();", element)
     
-    def input_text(self, locator, text, by=By.CSS_SELECTOR, clear=True):
+    def input_text(self, locator, text, by=By.CSS_SELECTOR, clear=True, timeout=10): # <-- Tambahkan 'by' dan 'clear'
         """Input text ke field"""
-        element = self.find_element(locator, by)
-        if clear:
-            element.clear()
-        element.send_keys(text)
-    
+        try:
+            # Panggil find_element Anda yang sudah benar
+            element = self.find_element(locator, by=by, timeout=timeout) 
+            
+            if clear:
+                element.clear()
+            element.send_keys(text)
+        except TimeoutException:
+            raise Exception(f"Element tidak ditemukan: {locator} (Timeout setelah {timeout}s)")
+                
     def get_text(self, locator, by=By.CSS_SELECTOR):
         """Get text dari element"""
         element = self.find_element(locator, by)
@@ -145,8 +149,23 @@ class BasePage:
         self.actions.move_to_element(element).perform()
     
     def wait_for_page_load(self, timeout=30):
-        """Wait for page load"""
-        WebDriverWait(self.driver, timeout).until(
-            # Ini adalah cara standar menunggu semua resource dimuat
-            lambda driver: driver.execute_script("return document.readyState") == "complete"
-        )
+            """Wait for page load"""
+            WebDriverWait(self.driver, timeout).until(
+                lambda driver: driver.execute_script("return document.readyState") == "complete"
+            )
+    def _get_locator_tuple(self, locator, by_method=By.CSS_SELECTOR):
+            if isinstance(locator, tuple):
+                return locator
+            return (by_method, locator) # Asumsi locator yang masuk adalah string CSS/XPATH
+
+    # def input_text(self, locator, text, by_method=By.CSS_SELECTOR, timeout=10):
+    #     try:
+    #         locator_tuple = self._get_locator_tuple(locator, by_method)
+    #         # WAJIB: Gunakan Explicit Wait untuk Visibility sebelum Send Keys
+    #         element = WebDriverWait(self.driver, timeout).until(
+    #             EC.visibility_of_element_located(locator_tuple)
+    #         )
+    #         element.clear() # Disarankan untuk membersihkan field
+    #         element.send_keys(text)
+    #     except TimeoutException:
+    #         raise Exception(f"Element tidak ditemukan: {locator} (Timeout setelah {timeout}s)")

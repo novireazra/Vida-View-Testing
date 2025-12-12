@@ -1,12 +1,18 @@
 import pytest
 from pages.login_page import LoginPage # <-- Asumsi path ke LoginPage
+from pages.login_page import LoginPageLocators
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 from webdriver_manager.firefox import GeckoDriverManager
 from config.config import Config
+from selenium.webdriver.support.ui import WebDriverWait
+from pages.login_page import LoginPageLocators
 from utils.helpers import ScreenshotHelper
 import os
 
@@ -110,15 +116,15 @@ def create_test_files():
 @pytest.fixture(scope="function")
 def login_admin(driver):
     """Fixture untuk login sebagai admin sebelum menjalankan tes."""
-    
+    driver.get(f"{Config.BASE_URL}/login")
+
     # Asumsi: Anda memiliki class LoginPage dan method login
     login_page = LoginPage(driver) 
     
-    print("\n[SETUP] Melakukan Login Admin...")
+    print(f"DEBUG: URL sebelum login: {driver.current_url}")
     
     # Navigasi ke halaman login (jika belum di sana dari driver.get(Config.BASE_URL))
-    driver.get(f"{Config.BASE_URL}/login")
-
+   
     try:
     # 20 detik untuk tombol Login (menggunakan WebDriverWait dari LoginPage)
         LoginPage(driver).wait.until(
@@ -129,12 +135,19 @@ def login_admin(driver):
         print("[WARNING] Tombol Login tidak terdeteksi di DOM setelah 20s. Melanjutkan...")
 
     login_page.wait_for_login_form_load()
-    
+    try:
     # Lakukan Login
-    login_page.login(
-        email=Config.ADMIN_EMAIL,
-        password=Config.ADMIN_PASSWORD
-    )
+        login_page.login(
+            email=Config.ADMIN_EMAIL,
+            password=Config.ADMIN_PASSWORD
+        )
+
+    except Exception as e:
+        # Menangkap error spesifik dari input email
+        print(f"DEBUG ERROR: URL saat kegagalan input email: {driver.current_url}")
+        # Cetak screenshot atau HTML untuk analisis offline
+        # driver.get_screenshot_as_file("error_login.png")
+        raise Exception(f"Login Gagal. URL: {driver.current_url}. Original Error: {e}")
     
     # WAJIB: Tambahkan Wait untuk memastikan login berhasil dan navigasi selesai
     # login_page.wait_for_successful_admin_login() 

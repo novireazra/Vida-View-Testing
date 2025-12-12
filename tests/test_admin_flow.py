@@ -238,7 +238,6 @@ class TestAdminFlow:
         except Exception as e:
             raise Exception(f"Gagal memuat Halaman Promosi Admin. Tombol 'Tambah Promosi' tidak ditemukan: {e}")
         
-        
         promo_mgmt.click_add_promotion()
         
         # Try to submit without filling required fields

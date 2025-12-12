@@ -1,5 +1,5 @@
 class LoginPageLocators:
-    EMAIL_INPUT = "input[name='email']"
+    EMAIL_INPUT = "//input[@name='email']"
     PASSWORD_INPUT = "input[name='password']"
     LOGIN_BUTTON = "button[type='submit']"
     REGISTER_LINK = "a[href='/register']"
@@ -80,7 +80,7 @@ class PaymentPageLocators:
     PREVIOUS_BUTTON = "//button[contains(text(), 'Kembali')]"
 
 class DocumentsPageLocators:
-    UPLOAD_BUTTON = "//button[normalize-space()='Upload Dokumen']"
+    UPLOAD_BUTTON = "//*[normalize-space(.)='Upload Dokumen']"
     DOCUMENT_TYPE_SELECT = "select"
     FILE_INPUT = "input#document-upload"
     UPLOAD_MODAL_BUTTON = "//button[contains(text(), 'Upload Dokumen')]"

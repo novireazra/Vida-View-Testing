@@ -16,12 +16,16 @@ class LoginPage(BasePage):
     
     def input_email(self, email):
         """Input email"""
-        self.input_text(self.locators.EMAIL_INPUT, email)
-    
+        # WAJIB: Tentukan By.XPATH karena Anda menggunakan locator XPATH
+        self.input_text(self.locators.EMAIL_INPUT, email, by=By.XPATH)
+        
     def input_password(self, password):
         """Input password"""
-        self.input_text(self.locators.PASSWORD_INPUT, password)
-    
+        # Jika PASSWORD_INPUT masih CSS:
+        self.input_text(self.locators.PASSWORD_INPUT, password, by=By.CSS_SELECTOR)
+        # Jika PASSWORD_INPUT juga XPATH, gunakan:
+        # self.input_text(self.locators.PASSWORD_INPUT, password, by=By.XPATH)
+        
     def click_login_button(self):
         """Click login button"""
         self.click(self.locators.LOGIN_BUTTON)
@@ -41,33 +45,6 @@ class LoginPage(BasePage):
     def get_error_message(self):
         """Get error message text"""
         return self.get_text(self.locators.ERROR_MESSAGE)
-    
-    def wait_for_login_form_load(self):
-        """Menunggu elemen input email terlihat. Termasuk refresh jika timeout."""
-        TIMEOUT_INITIAL = 15
-        try:
-            # Peningkatan 1: Coba tunggu form login (email) dengan timeout yang lebih panjang (misal 15s)
-            self.wait_for_page_load() 
-            self.find_element(self.locators.EMAIL_INPUT, By.CSS_SELECTOR) # <--- Perpanjang Timeout
-
-            print("[INFO] Halaman Login termuat, form email terlihat.")
-
-        except TimeoutException as e:
-            print(f"[ERROR] Timeout saat menunggu form login (Percobaan 1, {TIMEOUT_INITIAL}s). URL: {self.driver.current_url}")            
-                        # Fallback: Refresh halaman dan coba lagi
-            self.driver.refresh()
-            self.wait_for_page_load()
-
-            TIMEOUT_REFRESH = 10
-            # Peningkatan 2: Coba verifikasi elemen kunci lain (Tombol Login)
-            try:
-                self.find_element(self.locators.EMAIL_INPUT, By.CSS_SELECTOR, timeout=TIMEOUT_REFRESH)
-                print("[INFO] Tombol Login terlihat, mungkin email sedang lambat dirender.")
-                # Jika tombol terlihat, kita berasumsi form akan datang, dan melanjutkan (biarkan input_text error jika masih ada masalah)
-               
-            except TimeoutException:
-               xception(f"Element tidak ditemukan: {self.locators.EMAIL_INPUT} setelah refresh ({TIMEOUT_REFRESH}s). Halaman gagal dimuat secara konsisten.")
-
             
     def login(self, email, password, remember=False):
         """Complete login flow"""
@@ -77,6 +54,32 @@ class LoginPage(BasePage):
             self.check_remember_me()
         self.click_login_button()
     
+    def wait_for_login_form_load(self):
+        """Menunggu elemen input email terlihat. Termasuk refresh jika timeout."""
+        TIMEOUT_INITIAL = 15
+        locator = self.locators.EMAIL_INPUT # Ambil locator email
+        
+        try:
+            self.wait_for_page_load() 
+            # Perhatikan: Pastikan find_element di BasePage menerima 'timeout'
+            self.find_element(locator, By.CSS_SELECTOR, timeout=TIMEOUT_INITIAL) 
+
+            print("[INFO] Halaman Login termuat, form email terlihat.")
+
+        except TimeoutException:
+            print(f"[ERROR] Timeout saat menunggu form login (Percobaan 1, {TIMEOUT_INITIAL}s). URL: {self.driver.current_url}")
+            
+            # Fallback: Refresh halaman dan coba lagi
+            self.driver.refresh()
+            self.wait_for_page_load()
+
+            TIMEOUT_REFRESH = 10
+            try:
+                self.find_element(locator, By.CSS_SELECTOR, timeout=TIMEOUT_REFRESH)
+                print("[INFO] Elemen email terlihat setelah refresh.")
+            except TimeoutException:
+                # Gagal total setelah refresh
+                raise Exception(f"Element tidak ditemukan: {locator} setelah refresh ({TIMEOUT_REFRESH}s). Halaman gagal dimuat secara konsisten.")
     
     def wait_for_successful_admin_login(self):
             """
