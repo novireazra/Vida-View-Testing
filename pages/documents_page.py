@@ -1,5 +1,6 @@
 from pages.base_page import BasePage
 from config.locators import DocumentsPageLocators
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 import time
 
@@ -13,11 +14,37 @@ class DocumentsPage(BasePage):
         from config.config import Config
         self.navigate_to(f"{Config.BASE_URL}/tenant/documents")
         self.wait_for_page_load()
-    
+        locator = self.locators.UPLOAD_BUTTON
+        by = By.XPATH
+
+        try:
+        # Gunakan find_element untuk menunggu visibilitas tombol Upload
+            self.find_element(locator, by)
+        except TimeoutException:
+            # Jika tombol tidak terlihat dalam 20 detik (misalnya karena loading spinner), 
+            # kita coba scroll, tapi ini sangat tidak mungkin jika 20 detik sudah habis.
+            # Jika Anda yakin halaman sudah benar-benar dimuat, raise error
+            raise TimeoutException(f"Gagal memuat halaman dokumen. Tombol {locator} tidak ditemukan dalam {Config.EXPLICIT_WAIT} detik.")
+
     def click_upload_button(self):
         """Click upload document button"""
-        self.click(self.locators.UPLOAD_BUTTON, By.XPATH)
-        time.sleep(1)
+        locator = self.locators.UPLOAD_BUTTON
+        by = By.XPATH
+            
+        # Coba langsung Force Click (yang sudah mengandung wait_for_element_clickable)
+        # Jika force_click gagal (Timeout atau Intercepted), force_click akan mencoba mengatasi.
+        try:
+                self.force_click(locator, by)
+        except TimeoutException: # Gunakan TimeoutException spesifik
+                # Jika Force Click gagal (Timeout), coba scroll dan klik lagi
+                self.scroll_to_element(locator, by)
+                self.force_click(locator, by)
+        except Exception as e:
+                # Tangani exception lain (misal ElementClickIntercepted)
+                print(f"Klik gagal, mencoba scroll dan klik lagi. Error: {e.__class__.__name__}")
+                self.scroll_to_element(locator, by)
+                self.force_click(locator, by)
+                
     
     def select_document_type(self, doc_type):
         """Select document type (id_card, selfie, income, reference)"""

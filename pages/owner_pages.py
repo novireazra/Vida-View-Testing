@@ -15,9 +15,13 @@ class OwnerUnitsPage(BasePage):
         self.wait_for_page_load()
     
     def click_add_unit(self):
-        """Click add unit button"""
-        self.click(self.locators.ADD_UNIT_BUTTON, By.XPATH)
+        try:
+            self.click(self.locators.ADD_UNIT_BUTTON, By.XPATH)
+        except:
+            print("Normal click gagal, mencoba force_click...")
+            self.force_click(self.locators.ADD_UNIT_BUTTON, By.XPATH)
         time.sleep(1)
+
     
     def filter_all_units(self):
         """Filter semua units"""

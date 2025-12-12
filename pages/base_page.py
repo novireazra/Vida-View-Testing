@@ -9,26 +9,42 @@ import time
 class BasePage:
     def __init__(self, driver):
         self.driver = driver
-        self.wait = WebDriverWait(driver, Config.EXPLICIT_WAIT)
+        # Menggunakan Config.EXPLICIT_WAIT untuk semua waits
+        self.wait = WebDriverWait(driver, Config.EXPLICIT_WAIT) 
         self.actions = ActionChains(driver)
     
     def find_element(self, locator, by=By.CSS_SELECTOR, timeout=None):
-        """Find element dengan wait"""
+        """Find element dengan wait sampai element terlihat (visibility_of_element_located)"""
         try:
             wait_time = timeout if timeout else Config.EXPLICIT_WAIT
             wait = WebDriverWait(self.driver, wait_time)
-            return wait.until(EC.presence_of_element_located((by, locator)))
+            # Mengubah dari presence_of_element_located ke visibility_of_element_located
+            return wait.until(EC.visibility_of_element_located((by, locator))) 
         except TimeoutException:
+            # Tetap gunakan exception yang informatif
             raise Exception(f"Element tidak ditemukan: {locator}")
+
     
     def find_elements(self, locator, by=By.CSS_SELECTOR):
         """Find multiple elements"""
         return self.driver.find_elements(by, locator)
     
+    def wait_for_element_clickable(self, locator, by=By.CSS_SELECTOR):
+        """Wait sampai element clickable (EC.element_to_be_clickable)"""
+        return self.wait.until(EC.element_to_be_clickable((by, locator)))
+
     def click(self, locator, by=By.CSS_SELECTOR):
-        """Click element"""
-        element = self.find_element(locator, by)
+        """Click element setelah dipastikan clickable"""
+        element = self.wait_for_element_clickable(locator, by)
         element.click()
+    
+    # 💥 FUNGSI BARU UNTUK MENGATASI TIMEOUT PADA TOMBOL (FORCE CLICK) 💥
+    def force_click(self, locator, by=By.CSS_SELECTOR):
+        """Klik element menggunakan JavaScript (mengatasi masalah overlay/interactability)"""
+        # Tunggu elemen sampai clickable (seperti di fungsi click normal)
+        element = self.wait_for_element_clickable(locator, by) 
+        # Lakukan klik menggunakan JavaScript
+        self.driver.execute_script("arguments[0].click();", element)
     
     def input_text(self, locator, text, by=By.CSS_SELECTOR, clear=True):
         """Input text ke field"""
@@ -59,9 +75,8 @@ class BasePage:
         except NoSuchElementException:
             return False
     
-    def wait_for_element_clickable(self, locator, by=By.CSS_SELECTOR):
-        """Wait sampai element clickable"""
-        return self.wait.until(EC.element_to_be_clickable((by, locator)))
+    # ... (Fungsi-fungsi lain tetap sama seperti sebelumnya) ...
+    # ...
     
     def scroll_to_element(self, locator, by=By.CSS_SELECTOR):
         """Scroll ke element"""
@@ -132,5 +147,6 @@ class BasePage:
     def wait_for_page_load(self, timeout=30):
         """Wait for page load"""
         WebDriverWait(self.driver, timeout).until(
+            # Ini adalah cara standar menunggu semua resource dimuat
             lambda driver: driver.execute_script("return document.readyState") == "complete"
         )

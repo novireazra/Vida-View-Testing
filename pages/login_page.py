@@ -1,7 +1,8 @@
 from pages.base_page import BasePage
-from config.locators import LoginPageLocators
+from config.locators import LoginPageLocators, AdminDashboardLocators
 from selenium.webdriver.common.by import By
-
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException # <--- HARUS ADA
 class LoginPage(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
@@ -41,6 +42,33 @@ class LoginPage(BasePage):
         """Get error message text"""
         return self.get_text(self.locators.ERROR_MESSAGE)
     
+    def wait_for_login_form_load(self):
+        """Menunggu elemen input email terlihat. Termasuk refresh jika timeout."""
+        TIMEOUT_INITIAL = 15
+        try:
+            # Peningkatan 1: Coba tunggu form login (email) dengan timeout yang lebih panjang (misal 15s)
+            self.wait_for_page_load() 
+            self.find_element(self.locators.EMAIL_INPUT, By.CSS_SELECTOR) # <--- Perpanjang Timeout
+
+            print("[INFO] Halaman Login termuat, form email terlihat.")
+
+        except TimeoutException as e:
+            print(f"[ERROR] Timeout saat menunggu form login (Percobaan 1, {TIMEOUT_INITIAL}s). URL: {self.driver.current_url}")            
+                        # Fallback: Refresh halaman dan coba lagi
+            self.driver.refresh()
+            self.wait_for_page_load()
+
+            TIMEOUT_REFRESH = 10
+            # Peningkatan 2: Coba verifikasi elemen kunci lain (Tombol Login)
+            try:
+                self.find_element(self.locators.EMAIL_INPUT, By.CSS_SELECTOR, timeout=TIMEOUT_REFRESH)
+                print("[INFO] Tombol Login terlihat, mungkin email sedang lambat dirender.")
+                # Jika tombol terlihat, kita berasumsi form akan datang, dan melanjutkan (biarkan input_text error jika masih ada masalah)
+               
+            except TimeoutException:
+               xception(f"Element tidak ditemukan: {self.locators.EMAIL_INPUT} setelah refresh ({TIMEOUT_REFRESH}s). Halaman gagal dimuat secara konsisten.")
+
+            
     def login(self, email, password, remember=False):
         """Complete login flow"""
         self.input_email(email)
@@ -48,4 +76,29 @@ class LoginPage(BasePage):
         if remember:
             self.check_remember_me()
         self.click_login_button()
-        self.wait_for_page_load()
+    
+    
+    def wait_for_successful_admin_login(self):
+            """
+            Menunggu elemen Admin Dashboard (misalnya, link Users) muncul setelah login berhasil.
+            """
+            # AdminDashboardLocators.USERS_LINK = "a[href='/admin/users']"
+            try:
+                self.wait.until(
+                    EC.visibility_of_element_located(
+                        (By.CSS_SELECTOR, AdminDashboardLocators.USERS_LINK) 
+                    )
+                )
+                # Opsional: Tunggu page load lagi setelah elemen terlihat
+                # self.wait_for_page_load() 
+                print("[INFO] Login Admin Berhasil, Dashboard admin terlihat.")
+                
+            except TimeoutException:
+                # Jika elemen admin tidak muncul, cek apakah ada pesan error login atau jika masih di halaman login.
+                current_url = self.driver.current_url
+                if "/login" in current_url:
+                    # Asumsi BasePage memiliki is_element_visible() yang menggunakan timeout pendek (misal 3 detik)
+                    if self.is_element_visible(self.locators.ERROR_MESSAGE, timeout=3):
+                        raise Exception(f"Login Gagal: {self.get_text(self.locators.ERROR_MESSAGE)}")
+                
+                raise TimeoutException("Login Gagal: Halaman Admin Dashboard tidak termuat setelah otentikasi.")

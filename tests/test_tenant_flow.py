@@ -100,15 +100,15 @@ class TestTenantFlow:
         docs_page = DocumentsPage(driver)
         
         docs_page.navigate_to_documents()
-        time.sleep(2)
+     
         
         # Upload KTP
         docs_page.upload_ktp(Config.KTP_IMAGE)
-        time.sleep(3)
+     
         
         # Upload Selfie
         docs_page.upload_selfie(Config.SELFIE_IMAGE)
-        time.sleep(3)
+    
         
         # Verify documents uploaded (status pending)
         assert docs_page.is_verification_pending()

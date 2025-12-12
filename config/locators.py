@@ -14,9 +14,10 @@ class RegisterPageLocators:
     FULL_NAME_INPUT = "input[name='full_name']"
     PHONE_INPUT = "input[name='phone']"
     BIRTH_DATE_INPUT = "input[name='birth_date']"
+    BIRTH_DATE_ERROR_MESSAGE = ".text-red-500"
     ADDRESS_INPUT = "input[name='address']"
-    ROLE_TENANT_BUTTON = "//button[contains(text(), 'Penyewa')]"
-    ROLE_OWNER_BUTTON = "//button[contains(text(), 'Pemilik')]"
+    ROLE_TENANT_BUTTON = "//button[contains(., 'Penyewa')]"
+    ROLE_OWNER_BUTTON = "//button[contains(., 'Pemilik')]"
     TERMS_CHECKBOX = "input#terms"
     REGISTER_BUTTON = "button[type='submit']"
     LOGIN_LINK = "a[href='/login']"
@@ -79,13 +80,13 @@ class PaymentPageLocators:
     PREVIOUS_BUTTON = "//button[contains(text(), 'Kembali')]"
 
 class DocumentsPageLocators:
-    UPLOAD_BUTTON = "//button[contains(., 'Upload Dokumen')]"
+    UPLOAD_BUTTON = "//button[normalize-space()='Upload Dokumen']"
     DOCUMENT_TYPE_SELECT = "select"
     FILE_INPUT = "input#document-upload"
     UPLOAD_MODAL_BUTTON = "//button[contains(text(), 'Upload Dokumen')]"
     VIEW_BUTTON = "//button[contains(., 'Lihat')]"
     VERIFICATION_STATUS = ".bg-green-100, .bg-yellow-100"
-    KTP_CARD = "//h3[contains(text(), 'Kartu Identitas')]"
+    KTP_CARD = "//h3[normalize-space(text())='Kartu Identitas']"
     SELFIE_CARD = "//h3[contains(text(), 'Foto Selfie')]"
 
 class DashboardLocators:
@@ -129,7 +130,7 @@ class PromotionLocators:
     PROMO_CARD = ".bg-white.rounded-xl.shadow-md"
 
 class OwnerUnitsLocators:
-    ADD_UNIT_BUTTON = "//button[contains(., 'Tambah Unit')]"
+    ADD_UNIT_BUTTON = "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'tambah')]"
     UNIT_CARD = ".relative > div"
     VIEW_BUTTON = "button[title='Lihat Detail']"
     EDIT_BUTTON = "button[title='Edit']"

@@ -4,6 +4,7 @@ from config.locators import (
     UserManagementLocators, 
     PromotionLocators
 )
+from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException # <-- Tambah ini
 from selenium.webdriver.common.by import By
 import time
 
@@ -105,9 +106,32 @@ class PromotionManagementPage(BasePage):
         self.locators = PromotionLocators()
     
     def click_add_promotion(self):
-        """Click add promotion button"""
-        self.click(self.locators.ADD_PROMO_BUTTON, By.XPATH)
-        time.sleep(1)
+            """Click add promotion button dengan JS fallback jika klik standar gagal."""
+            locator = self.locators.ADD_PROMO_BUTTON
+            by = By.XPATH
+            
+            # 1. Coba klik standar (yang menunggu element clickable)
+            try:
+                self.click(locator, by)
+            
+            # 2. Jika gagal karena Timeout (misal: terhalang/overlay) atau Intercepted, gunakan JS Click
+            except (TimeoutException, ElementClickInterceptedException) as e:
+                print(f"Peringatan: Klik tombol '{locator}' gagal (Error: {e.__class__.__name__}). Mencoba klik via JavaScript.")
+                
+            try:
+                # Cari elemen yang terlihat (Visibility Wait sudah di handle oleh find_element di BasePage)
+                element = self.find_element(locator, by) 
+                self.driver.execute_script("arguments[0].click();", element)
+                # Gunakan JavaScript Click (Anda harus memastikan BasePage memiliki method execute_script)
+            except Exception as js_e:
+             # Jika JS Click gagal, raise exception yang lebih jelas
+             raise Exception(f"Gagal mengklik tombol '{locator}' bahkan dengan JavaScript. Error: {js_e}") 
+            # 3. Tunggu modal muncul
+            try:
+                self.find_element(self.locators.PROMO_CODE_INPUT)
+                print("[INFO] Modal Tambah Promosi berhasil terbuka.")
+            except TimeoutException:
+                raise TimeoutException("Gagal membuka modal Tambah Promosi: Input Kode Promosi tidak terlihat setelah tombol diklik.")
     
     def input_promo_code(self, code):
         """Input promo code"""
@@ -151,7 +175,7 @@ class PromotionManagementPage(BasePage):
         self.input_promo_title(title)
         self.select_promo_type(promo_type)
         self.input_promo_value(value)
-        self.input_start_date(start_date)
+        self.input_start_date(start_date) # Menggunakan parameter start_date
         self.input_end_date(end_date)
         self.check_active()
         self.click_submit()

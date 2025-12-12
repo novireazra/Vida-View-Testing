@@ -1,5 +1,6 @@
 import pytest
 import time
+from selenium.webdriver.common.by import By
 from pages.login_page import LoginPage
 from pages.admin_pages import AdminDashboardPage, UserManagementPage, PromotionManagementPage
 from config.config import Config
@@ -27,7 +28,7 @@ class TestAdminFlow:
         admin_dash = AdminDashboardPage(driver)
         
         driver.get(f"{Config.BASE_URL}/admin/dashboard")
-        time.sleep(2)
+        time.sleep(4)
         
         # Verify dashboard loaded
         assert "/admin/dashboard" in driver.current_url
@@ -39,10 +40,10 @@ class TestAdminFlow:
         admin_dash = AdminDashboardPage(driver)
         
         driver.get(f"{Config.BASE_URL}/admin/dashboard")
-        time.sleep(1)
+        time.sleep(2)
         
         admin_dash.navigate_to_users()
-        time.sleep(2)
+        time.sleep(4)
         
         # Verify users page loaded
         assert "/admin/users" in driver.current_url
@@ -187,12 +188,19 @@ class TestAdminFlow:
     @pytest.mark.admin
     @pytest.mark.critical
     @pytest.mark.slow
-    def test_TC_ADM_013_create_promotion(self, driver):
+    def test_TC_ADM_013_create_promotion(self, driver, login_admin):
         """TC_ADM_013: Create new promotion"""
+        admin_dashboard = AdminDashboardPage(driver)
         promo_mgmt = PromotionManagementPage(driver)
         
-        driver.get(f"{Config.BASE_URL}/admin/promotions")
-        time.sleep(2)
+        # Asumsi: Fixture/Method login_admin(driver) telah dieksekusi 
+        # sebelum baris ini untuk memastikan otentikasi.
+        
+        admin_dashboard.navigate_to_promotions() # <-- Panggil method navigasi
+
+        # [WAJIB] Tunggu tombol muncul (Explicit Wait untuk Visibility)
+        # Baris ini sekarang seharusnya berhasil karena 'By' sudah di-import
+        promo_mgmt.find_element(promo_mgmt.locators.ADD_PROMO_BUTTON, By.XPATH)
         
         initial_count = promo_mgmt.get_promotion_cards_count()
         
@@ -207,21 +215,31 @@ class TestAdminFlow:
             start_date=TestData.PROMO_DATA['start_date'],
             end_date=TestData.PROMO_DATA['end_date']
         )
-        time.sleep(3)
         
-        # Verify promotion created
-        assert True
-    
+        # time.sleep(3) # Dihapus atau diganti dengan wait yang lebih baik
+        
+        # [WAJIB] Verifikasi dengan menghitung ulang 
+        final_count = promo_mgmt.get_promotion_cards_count()
+
+        # Perbaiki Assertion untuk memverifikasi penambahan
+        assert final_count == initial_count + 1, f"Gagal menambahkan promosi baru. Awal: {initial_count}, Akhir: {final_count}"
+        
     @pytest.mark.admin
     def test_TC_ADM_014_create_promotion_invalid(self, driver):
         """TC_ADM_014: Create promotion dengan data invalid"""
         promo_mgmt = PromotionManagementPage(driver)
         
         driver.get(f"{Config.BASE_URL}/admin/promotions")
-        time.sleep(2)
+
+
+        try:
+            promo_mgmt.find_element(promo_mgmt.locators.ADD_PROMO_BUTTON, By.XPATH)
+            print("[INFO] Halaman Promosi termuat, tombol 'Tambah Promosi' terlihat.")
+        except Exception as e:
+            raise Exception(f"Gagal memuat Halaman Promosi Admin. Tombol 'Tambah Promosi' tidak ditemukan: {e}")
+        
         
         promo_mgmt.click_add_promotion()
-        time.sleep(1)
         
         # Try to submit without filling required fields
         promo_mgmt.click_submit()

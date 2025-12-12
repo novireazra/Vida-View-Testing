@@ -4,7 +4,7 @@ from pathlib import Path
 class Config:
     # Base Configuration
     BASE_URL = "http://localhost:3000"  # Ganti dengan URL frontend Anda
-    API_URL = "http://localhost:5000"   # Ganti dengan URL backend Anda
+    API_URL = "http://localhost:5001"   # Ganti dengan URL backend Anda
     
     # Browser Configuration
     BROWSER = "chrome"  # chrome, firefox, edge
@@ -14,14 +14,14 @@ class Config:
     PAGE_LOAD_TIMEOUT = 30
     
     # Test Data - Credentials
-    ADMIN_EMAIL = "vidaview@admin.com"
-    ADMIN_PASSWORD = "reskares9"
+    ADMIN_EMAIL = "noviazzahrah13@gmail.com"
+    ADMIN_PASSWORD = "12345678901"
     
-    OWNER_EMAIL = "testing@pemilik.com"
-    OWNER_PASSWORD = "reskares9"
+    OWNER_EMAIL = "novireazra@gmail.com"
+    OWNER_PASSWORD = "12345678"
     
-    TENANT_EMAIL = "testing@penyewa.com"
-    TENANT_PASSWORD = "reskares9"
+    TENANT_EMAIL = "ramadhaninra23h@student.unhas.ac.id"
+    TENANT_PASSWORD = "1234567890"
     
     # New User Registration Data
     NEW_USER_PREFIX = "testuser"

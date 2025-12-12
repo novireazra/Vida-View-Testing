@@ -1,4 +1,5 @@
 import pytest
+from pages.login_page import LoginPage # <-- Asumsi path ke LoginPage
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options as ChromeOptions
@@ -9,7 +10,7 @@ from config.config import Config
 from utils.helpers import ScreenshotHelper
 import os
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def driver(request):
     """Setup WebDriver"""
     
@@ -17,6 +18,7 @@ def driver(request):
     if Config.BROWSER.lower() == "chrome":
         chrome_options = ChromeOptions()
         if Config.HEADLESS:
+        
             chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
@@ -53,7 +55,7 @@ def driver(request):
         raise ValueError(f"Browser {Config.BROWSER} tidak didukung")
     
     # Set timeouts
-    driver.implicitly_wait(Config.IMPLICIT_WAIT)
+    driver.implicitly_wait(0)
     driver.set_page_load_timeout(Config.PAGE_LOAD_TIMEOUT)
     driver.maximize_window()
     
@@ -64,10 +66,11 @@ def driver(request):
     
     # Teardown
     # Take screenshot on failure
-    if request.node.rep_call.failed:
+    if hasattr(request.node, 'rep_call') and request.node.rep_call.failed:
         test_name = request.node.name
+        # Pastikan ScreenshotHelper sudah diimpor dan berfungsi
         ScreenshotHelper.take_screenshot_on_failure(driver, test_name)
-    
+
     driver.quit()
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -103,3 +106,38 @@ def create_test_files():
     # os.remove(Config.KTP_IMAGE)
     # os.remove(Config.SELFIE_IMAGE)
     # os.remove(Config.INCOME_PROOF)
+
+@pytest.fixture(scope="function")
+def login_admin(driver):
+    """Fixture untuk login sebagai admin sebelum menjalankan tes."""
+    
+    # Asumsi: Anda memiliki class LoginPage dan method login
+    login_page = LoginPage(driver) 
+    
+    print("\n[SETUP] Melakukan Login Admin...")
+    
+    # Navigasi ke halaman login (jika belum di sana dari driver.get(Config.BASE_URL))
+    driver.get(f"{Config.BASE_URL}/login")
+
+    try:
+    # 20 detik untuk tombol Login (menggunakan WebDriverWait dari LoginPage)
+        LoginPage(driver).wait.until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, LoginPageLocators.LOGIN_BUTTON)) 
+        )
+        print("[INFO] Tombol Login terdeteksi di DOM.")
+    except TimeoutException:
+        print("[WARNING] Tombol Login tidak terdeteksi di DOM setelah 20s. Melanjutkan...")
+
+    login_page.wait_for_login_form_load()
+    
+    # Lakukan Login
+    login_page.login(
+        email=Config.ADMIN_EMAIL,
+        password=Config.ADMIN_PASSWORD
+    )
+    
+    # WAJIB: Tambahkan Wait untuk memastikan login berhasil dan navigasi selesai
+    # login_page.wait_for_successful_admin_login() 
+    login_page.wait_for_successful_admin_login() # Panggil method wait yang baru
+
+    yield driver

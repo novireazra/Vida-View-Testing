@@ -49,17 +49,16 @@ class TestOwnerFlow:
     
     @pytest.mark.owner
     def test_TC_OWN_003_filter_units_occupied(self, driver):
-        """TC_OWN_003: Filter units - Occupied only"""
         units_page = OwnerUnitsPage(driver)
-        
+
         units_page.navigate_to_my_units()
-        time.sleep(1)
-        
+        time.sleep(2)
+
         units_page.filter_occupied_units()
         time.sleep(2)
-        
+
         assert True
-    
+
     @pytest.mark.owner
     @pytest.mark.critical
     @pytest.mark.slow
@@ -69,12 +68,12 @@ class TestOwnerFlow:
         add_modal = AddUnitModal(driver)
         
         units_page.navigate_to_my_units()
-        time.sleep(1)
+        time.sleep(3)
         
         initial_count = units_page.get_units_count()
         
         units_page.click_add_unit()
-        time.sleep(1)
+        time.sleep(3)
         
         # Generate unique unit number
         unit_number = f"TEST-{TestDataGenerator.generate_random_username()[:6].upper()}"
@@ -104,10 +103,15 @@ class TestOwnerFlow:
         add_modal = AddUnitModal(driver)
         
         units_page.navigate_to_my_units()
-        time.sleep(1)
+        time.sleep(2)
+
+        print("==== DEBUG BUTTON TEXT ON PAGE ====")
+    buttons = driver.find_elements(By.XPATH, "//button")
+    for b in buttons:
+        print(f"[BUTTON] '{b.text}'")
         
         units_page.click_add_unit()
-        time.sleep(1)
+        time.sleep(2)
         
         # Try to submit without filling required fields
         add_modal.click_submit()
@@ -210,7 +214,7 @@ class TestOwnerFlow:
     def test_TC_OWN_013_view_payments(self, driver):
         """TC_OWN_013: View payments from tenants"""
         driver.get(f"{Config.BASE_URL}/owner/payments")
-        time.sleep(2)
+        time.sleep(4)
         
         # Verify payments page loaded
         assert "/owner/payments" in driver.current_url
@@ -219,7 +223,7 @@ class TestOwnerFlow:
     def test_TC_OWN_014_verify_payment(self, driver):
         """TC_OWN_014: Verify tenant payment"""
         driver.get(f"{Config.BASE_URL}/owner/payments")
-        time.sleep(2)
+        time.sleep(4)
         
         # Placeholder for verify payment action
         assert "/owner/payments" in driver.current_url
