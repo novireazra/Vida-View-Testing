@@ -20,8 +20,12 @@ class Config:
     OWNER_EMAIL = "novireazra@gmail.com"
     OWNER_PASSWORD = "12345678"
     
-    TENANT_EMAIL = "ramadhaninra23h@student.unhas.ac.id"
-    TENANT_PASSWORD = "1234567890"
+    # TENANT_EMAIL = "ramadhaninra23h@student.unhas.ac.id"
+    # TENANT_PASSWORD = "1234567890"
+
+    TENANT_EMAIL = "testing@dokumen.com"
+    TENANT_PASSWORD = "novi123"
+    #booking
     
     # New User Registration Data
     NEW_USER_PREFIX = "testuser"

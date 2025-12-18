@@ -1,7 +1,12 @@
 from pages.base_page import BasePage
 from config.locators import DashboardLocators, NavbarLocators
 from selenium.webdriver.common.by import By
-import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import (
+    TimeoutException,
+    ElementClickInterceptedException
+)
 
 class DashboardPage(BasePage):
     def __init__(self, driver):
@@ -45,11 +50,43 @@ class DashboardPage(BasePage):
                 return
     
     def logout(self):
-        """Logout dari dashboard"""
-        self.click(self.navbar_locators.PROFILE_BUTTON)
-        time.sleep(0.5)
-        self.click(self.navbar_locators.LOGOUT_BUTTON, By.XPATH)
-        time.sleep(1)
+        """
+        Logout dari dashboard (FIXED)
+        - Menunggu overlay React hilang
+        - Anti ElementClickInterceptedException
+        - JS fallback jika perlu
+        """
+
+        wait = WebDriverWait(self.driver, 15)
+
+        # 1️⃣ Tunggu overlay/loading React menghilang
+        try:
+            wait.until(
+                EC.invisibility_of_element_located((
+                    By.CSS_SELECTOR,
+                    "div.fixed.inset-0.bg-white.bg-opacity-75"
+                ))
+            )
+        except TimeoutException:
+            print("[WARNING] Overlay tidak hilang, lanjutkan proses logout")
+
+        # 2️⃣ Klik tombol profile
+        profile_btn = wait.until(
+            EC.element_to_be_clickable(self.navbar_locators.PROFILE_BUTTON)
+        )
+
+        try:
+            profile_btn.click()
+        except ElementClickInterceptedException:
+            self.driver.execute_script(
+                "arguments[0].click();", profile_btn
+            )
+
+        # 3️⃣ Klik tombol logout
+        logout_btn = wait.until(
+            EC.element_to_be_clickable(self.navbar_locators.LOGOUT_BUTTON)
+        )
+        logout_btn.click()
     
     def click_notifications(self):
         """Click notifications bell"""

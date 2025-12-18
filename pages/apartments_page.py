@@ -29,11 +29,41 @@ class ApartmentsPage(BasePage):
         return len(self.find_elements(self.locators.APARTMENT_CARD))
     
     def click_first_apartment(self):
-        """Click apartment pertama"""
+        """Click apartment pertama untuk masuk ke detail page"""
+        import time
+        # Find all apartment cards
         cards = self.find_elements(self.locators.APARTMENT_CARD)
-        if cards:
+        if not cards:
+            raise Exception("Tidak ada apartment card yang ditemukan")
+
+        print(f"[DEBUG] Menemukan {len(cards)} apartment cards")
+
+        # Click the first card
+        try:
+            # Scroll to element first
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", cards[0])
+            time.sleep(1)
+
+            # Try normal click first
             cards[0].click()
-            self.wait_for_page_load()
+            print("[DEBUG] Berhasil klik apartment card pertama")
+        except Exception as e:
+            print(f"[DEBUG] Normal click gagal: {e}, mencoba JavaScript click")
+            # If normal click fails, use JavaScript click
+            self.driver.execute_script("arguments[0].click();", cards[0])
+
+        # Wait for navigation to detail page
+        time.sleep(2)
+        self.wait_for_page_load()
+
+        # Verify we're on detail page
+        current_url = self.driver.current_url
+        print(f"[DEBUG] URL setelah klik: {current_url}")
+
+        if "/apartments/" not in current_url or current_url.endswith("/apartments"):
+            print("[WARNING] Mungkin tidak berhasil masuk ke detail page")
+            # Take screenshot for debugging
+            self.take_screenshot("apartment_click_failed.png")
     
     def click_apartment_by_index(self, index):
         """Click apartment by index (0-based)"""

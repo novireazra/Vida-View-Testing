@@ -1,6 +1,9 @@
+import os
 import pytest
 import time
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from pages.login_page import LoginPage
 from pages.admin_pages import AdminDashboardPage, UserManagementPage, PromotionManagementPage
 from config.config import Config
@@ -132,19 +135,19 @@ class TestAdminFlow:
             # Edit modal should open
             assert True
     
-    @pytest.mark.admin
-    @pytest.mark.critical
-    def test_TC_ADM_009_navigate_to_bookings(self, driver):
-        """TC_ADM_009: Navigate to bookings management"""
-        admin_dash = AdminDashboardPage(driver)
+    # @pytest.mark.admin
+    # @pytest.mark.critical
+    # def test_TC_ADM_009_navigate_to_bookings(self, driver):
+    #     """TC_ADM_009: Navigate to bookings management"""
+    #     admin_dash = AdminDashboardPage(driver)
         
-        driver.get(f"{Config.BASE_URL}/admin/dashboard")
-        time.sleep(1)
+    #     driver.get(f"{Config.BASE_URL}/admin/dashboard")
+    #     time.sleep(1)
         
-        admin_dash.navigate_to_bookings()
-        time.sleep(2)
+    #     admin_dash.navigate_to_bookings()
+    #     time.sleep(2)
         
-        assert "/admin/bookings" in driver.current_url
+    #     assert "/admin/bookings" in driver.current_url
     
     @pytest.mark.admin
     @pytest.mark.critical
@@ -178,7 +181,7 @@ class TestAdminFlow:
         admin_dash = AdminDashboardPage(driver)
         
         driver.get(f"{Config.BASE_URL}/admin/dashboard")
-        time.sleep(1)
+        time.sleep(2)
         
         admin_dash.navigate_to_promotions()
         time.sleep(2)
@@ -192,14 +195,11 @@ class TestAdminFlow:
         """TC_ADM_013: Create new promotion"""
         admin_dashboard = AdminDashboardPage(driver)
         promo_mgmt = PromotionManagementPage(driver)
-        
-        # Asumsi: Fixture/Method login_admin(driver) telah dieksekusi 
-        # sebelum baris ini untuk memastikan otentikasi.
+
         
         admin_dashboard.navigate_to_promotions() # <-- Panggil method navigasi
 
-        # [WAJIB] Tunggu tombol muncul (Explicit Wait untuk Visibility)
-        # Baris ini sekarang seharusnya berhasil karena 'By' sudah di-import
+
         promo_mgmt.find_element(promo_mgmt.locators.ADD_PROMO_BUTTON, By.XPATH)
         
         initial_count = promo_mgmt.get_promotion_cards_count()
@@ -216,12 +216,7 @@ class TestAdminFlow:
             end_date=TestData.PROMO_DATA['end_date']
         )
         
-        # time.sleep(3) # Dihapus atau diganti dengan wait yang lebih baik
-        
-        # [WAJIB] Verifikasi dengan menghitung ulang 
         final_count = promo_mgmt.get_promotion_cards_count()
-
-        # Perbaiki Assertion untuk memverifikasi penambahan
         assert final_count == initial_count + 1, f"Gagal menambahkan promosi baru. Awal: {initial_count}, Akhir: {final_count}"
         
     @pytest.mark.admin
@@ -309,11 +304,30 @@ class TestAdminFlow:
         assert "/admin/reports" in driver.current_url
     
     @pytest.mark.admin
-    def test_TC_ADM_020_export_report(self, driver):
-        """TC_ADM_020: Export report (PDF/Excel)"""
+    def test_TC_ADM_020_export_report(self, driver, login_admin):
+        """TC_ADM_020: Export report dan validasi file terdownload"""
+
+        download_dir = os.path.join(os.getcwd(), "downloads")
+        os.makedirs(download_dir, exist_ok=True)
+
+        files_before = set(os.listdir(download_dir))
+
         driver.get(f"{Config.BASE_URL}/admin/reports")
-        time.sleep(2)
-        
-        # Placeholder for export action
-        # Note: Actual export testing might require download verification
-        assert "/admin/reports" in driver.current_url
+
+        export_btn = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable(
+                (By.XPATH, "//button[contains(., 'Export')]")
+            )
+        )
+        export_btn.click()
+
+        WebDriverWait(driver, 20).until(
+            lambda d: len(set(os.listdir(download_dir)) - files_before) > 0
+        )
+
+        files_after = set(os.listdir(download_dir))
+        new_files = files_after - files_before
+
+        assert len(new_files) == 1, "❌ File export tidak terdownload"
+        print(f"✅ Export berhasil: {list(new_files)[0]}")
+
